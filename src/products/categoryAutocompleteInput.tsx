@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import {
   AutocompleteInput,
   ListContextProvider,
@@ -6,11 +5,8 @@ import {
   useGetList,
   useList,
 } from "react-admin";
-import { useFormContext } from "react-hook-form";
 
-const CategoryAutocompleteInput = ({ defaultCategoryId = 0 }) => {
-  const { setValue } = useFormContext();
-
+const CategoryAutocompleteInput = () => {
   // fetch full list of ingredients
   const {
     data: categories = [],
@@ -26,19 +22,8 @@ const CategoryAutocompleteInput = ({ defaultCategoryId = 0 }) => {
     isPending: categoriesIsPending,
   });
 
-  useEffect(() => {
-    if (categories && categories.length > 0 && defaultCategoryId > 0) {
-      console.log("defaultCategoryId:", defaultCategoryId);
-      setValue("category_id", defaultCategoryId);
-    }
-  }, [defaultCategoryId, setValue, categories]);
-
-  useEffect(() => {
-    console.log("Categories fetched:", categories);
-    console.log("defaultCategoryId:", defaultCategoryId);
-  }, []);
-
   const optionRenderer = (choice: any) => `${choice.id} - ${choice.name}`;
+  if (categoriesIsPending) return null;
   return (
     <ResourceContextProvider value="categories">
       <ListContextProvider value={categoriesListContext}>

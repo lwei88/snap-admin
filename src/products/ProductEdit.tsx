@@ -27,7 +27,7 @@ interface ProductValues {
   ingredient_ids: number[];
 }
 
-export const ProductEdit = (props: EditProps) => {
+const ProductEdit = (props: EditProps) => {
   const { id } = useParams<{ id: string }>();
   const dataProvider = useDataProvider();
   const notify = useNotify();
@@ -35,7 +35,7 @@ export const ProductEdit = (props: EditProps) => {
 
   // fetch this product ingredients ids (All)
   const {
-    data: productsIngredientsIds = [],
+    data: productsIngredients = [],
     isPending: productsIngredientsIdsIsPending,
   } = useGetList("products_ingredients", {
     pagination: { page: 1, perPage: 1000 },
@@ -52,8 +52,8 @@ export const ProductEdit = (props: EditProps) => {
     filter: { product_id: id },
   });
 
-  const productCategoryId = productCategories[0]?.category_id || 0;
-  const productIngredientsIds = productsIngredientsIds.map(
+  const productCategoryId: number = productCategories[0]?.category_id || 0;
+  const productIngredientsIds: number[] = productsIngredients.map(
     (item: { ingredient_id: number }) => item.ingredient_id,
   );
 
@@ -74,15 +74,15 @@ export const ProductEdit = (props: EditProps) => {
           },
         });
 
-        await dataProvider.deleteMany("products_ingredients", {
-          ids: productsIngredientsIds.map((item: { id: number }) => item.id),
-        });
-        await dataProvider.createMany("products_ingredients", {
-          data: values.ingredient_ids.map((id) => ({
-            product_id: values.id,
-            ingredient_id: id,
-          })),
-        });
+        // await dataProvider.deleteMany("products_ingredients", {
+        //   ids: productsIngredientsIds.map((item: { id: number }) => item.id),
+        // });
+        // await dataProvider.createMany("products_ingredients", {
+        //   data: values.ingredient_ids.map((id) => ({
+        //     product_id: values.id,
+        //     ingredient_id: id,
+        //   })),
+        // });
 
         await dataProvider.update("products_categories", {
           id: productCategories[0].id,
@@ -96,7 +96,7 @@ export const ProductEdit = (props: EditProps) => {
         console.error("Error updating product:", error);
       }
     },
-    [dataProvider, notify, redirect, productsIngredientsIds, productCategories],
+    [dataProvider, notify, redirect, productsIngredients, productCategories],
   );
 
   const ProductImage = () => {
@@ -120,7 +120,7 @@ export const ProductEdit = (props: EditProps) => {
     <Edit {...props}>
       <SimpleForm
         onSubmit={handleSave}
-        defaultValue={{
+        defaultValues={{
           category_id: productCategoryId,
           ingredient_ids: productIngredientsIds,
         }}
@@ -128,13 +128,13 @@ export const ProductEdit = (props: EditProps) => {
         <ProductImage />
         <TextInput source="title" />
         <TextInput source="brand" />
-        <CategoryAutocompleteInput defaultCategoryId={productCategoryId} />
-        <IngredientAutocompleteInput
-          defaultIngredientIds={productIngredientsIds}
-        />
+        <CategoryAutocompleteInput />
+        <IngredientAutocompleteInput />
         <TextInput source="description" />
         <BooleanInput source="approved" />
       </SimpleForm>
     </Edit>
   );
 };
+
+export { ProductEdit };

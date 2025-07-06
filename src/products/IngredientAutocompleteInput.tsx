@@ -2,27 +2,19 @@ import { useEffect, useState } from "react";
 import {
   AutocompleteArrayInput,
   ListContextProvider,
+  ReferenceArrayInput,
   ResourceContextProvider,
   useGetList,
   useGetMany,
   useList,
 } from "react-admin";
-import { useDebounce } from "../utils/useDebounce";
 import { useFormContext } from "react-hook-form";
+import { useDebounce } from "../utils/useDebounce";
 
-interface IngredientAutocompleteInputProps {
-  defaultIngredientIds?: number[];
-}
-
-const IngredientAutocompleteInput = ({
-  defaultIngredientIds = [],
-}: IngredientAutocompleteInputProps) => {
-  const { setValue } = useFormContext();
+const IngredientAutocompleteInput = () => {
   const [searchIngredient, setSearchIngredient] = useState("");
-  const debouncedSearchIngredient = useDebounce(searchIngredient, 800);
-
-  const [currentSelectedIngredientIds, setCurrentSelectedIngredientIds] =
-    useState<number[]>([]);
+  const debouncedSearchIngredient = useDebounce(searchIngredient, 1000);
+  const { watch } = useFormContext();
 
   // fetch full list of ingredients
   const {
@@ -44,42 +36,26 @@ const IngredientAutocompleteInput = ({
   const {
     data: productIngredients = [],
     isPending: productIngredientsIsPending,
-  } = useGetMany("ingredients", { ids: currentSelectedIngredientIds });
+  } = useGetMany("ingredients", { ids: watch("ingredient_ids") });
 
-  const combinedChoices = [
+  const allChoices = [
     ...productIngredients.filter(
       (ingredient) => !ingredients?.find((c) => c.id === ingredient.id),
     ),
     ...ingredients,
   ];
 
-  useEffect(() => {
-    if (
-      combinedChoices &&
-      combinedChoices.length > 0 &&
-      defaultIngredientIds &&
-      defaultIngredientIds.length > 0
-    ) {
-      console.log("Setting default ingredient ids:", defaultIngredientIds);
-      console.log("Current selected ingredient ids:", productIngredients);
-      setValue("ingredient_ids", defaultIngredientIds);
-      setCurrentSelectedIngredientIds(defaultIngredientIds);
-    }
-  }, [defaultIngredientIds, setValue, combinedChoices]);
-
   return (
     <ResourceContextProvider value="ingredients">
       <ListContextProvider value={ingredientsListContext}>
         <AutocompleteArrayInput
           source="ingredient_ids"
-          choices={combinedChoices}
+          choices={allChoices}
           optionText="title"
           optionValue="id"
+          inputValue={searchIngredient}
           onInputChange={(_event, value) => {
             setSearchIngredient(value);
-          }}
-          onChange={(value: any) => {
-            setCurrentSelectedIngredientIds(value);
           }}
           isPending={ingredientsIsPending || productIngredientsIsPending}
         />
