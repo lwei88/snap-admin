@@ -13,6 +13,8 @@ import {
 } from "ra-supabase";
 import products from "./products";
 import { snapDataProvider, supabaseClient } from "./common/snapDataProvider";
+import { UserInputed } from "./products/UserInputed";
+import { Layout } from "./Layout";
 const authProvider = supabaseAuthProvider(supabaseClient, {});
 
 export const App = () => (
@@ -22,8 +24,12 @@ export const App = () => (
       authProvider={authProvider}
       i18nProvider={defaultI18nProvider}
       loginPage={LoginPage}
+      layout={Layout}
     >
       <Resource {...products} />
+      <CustomRoutes>
+        <Route path="/products/user-inputed" element={<UserInputed />} />
+      </CustomRoutes>
       <Resource
         name="ingredients"
         list={ListGuesser}

@@ -84,11 +84,20 @@ const ProductEdit = (props: EditProps) => {
         //   })),
         // });
 
-        await dataProvider.update("products_categories", {
-          id: productCategories[0].id,
-          data: { category_id: values.category_id },
-          previousData: productCategories[0],
-        });
+        if (values.category_id) {
+          if (productCategories && productCategories.length > 0) {
+            await dataProvider.update("products_categories", {
+              id: productCategories[0].id,
+              data: { category_id: values.category_id },
+              previousData: productCategories[0],
+            });
+          } else {
+            await dataProvider.create("products_categories", {
+              data: { category_id: values.category_id, product_id: values.id },
+            });
+          }
+        }
+
         notify("Product updated successfully", { type: "info" });
         redirect("show", "products", values.id);
       } catch (error) {
